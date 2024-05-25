@@ -12,7 +12,7 @@ app.use(cors());
 // MongoDB uri
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.0ztfqf2.mongodb.net/?retryWrites=true&w=majority`;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -29,6 +29,10 @@ async function run() {
     // Todos CRUD
     // Get all todos
     app.get("/todos", async (req, res) => {
+      let query = {};
+      if (req.query.priority) {
+        query.priority = req.query.priority;
+      }
       const allTodos = await todosCollection.find().toArray();
       res.send(allTodos);
     });
@@ -51,23 +55,24 @@ async function run() {
     // Update todo by Id
     app.put("/todos/:id", async (req, res) => {
       const id = req.params.id;
-      const updatedTodo = req.body;
-      const query = { _id: new ObjectId(id) };
-
-      try {
-        const result = await todosCollection.updateOne(query, {
-          $set: updatedTodo,
-        });
-        if (result.matchedCount === 0) {
-          return res.status(404).json({ error: "Todo not found" });
-        }
-        res.json(result);
-      } catch (error) {
-        console.error("Error updating todo:", error);
-        res
-          .status(500)
-          .json({ error: "Internal server error", message: error.message });
-      }
+      console.log(id);
+      const todos = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          isCompleted: todos.isCompleted,
+          title: todos.title,
+          description: todos.description,
+          priority: todos.priority,
+        },
+      };
+      const options = { upsert: true };
+      const result = await todosCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.json(result);
     });
 
     // Delete todo by Id
@@ -78,7 +83,7 @@ async function run() {
       res.send(result);
     });
 
-    // Send a ping to confirm a successful connection
+    // Sending a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
