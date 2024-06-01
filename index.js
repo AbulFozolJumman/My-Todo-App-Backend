@@ -3,11 +3,11 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 2024;
 
 // Middleware
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
 // MongoDB uri
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.0ztfqf2.mongodb.net/?retryWrites=true&w=majority`;
@@ -18,6 +18,8 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   },
 });
 
