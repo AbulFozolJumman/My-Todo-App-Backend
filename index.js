@@ -33,7 +33,7 @@ async function run() {
       if (req.query.priority) {
         query.priority = req.query.priority;
       }
-      const allTodos = await todosCollection.find().toArray();
+      const allTodos = await todosCollection.find(query).toArray();
       res.send(allTodos);
     });
 
