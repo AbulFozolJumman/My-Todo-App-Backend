@@ -59,7 +59,7 @@ async function run() {
       const id = req.params.id;
       console.log(id);
       const todos = req.body;
-      const filter = { _id: ObjectId(id) };
+      const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
           isCompleted: todos.isCompleted,
